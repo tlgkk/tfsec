@@ -231,39 +231,41 @@ var AttrMatchFunctions = map[CheckAction]func(*terraform.Attribute, *MatchSpec, 
 }
 
 func ProcessFoundChecks(checks ChecksFile) {
-    for _, customCheck := range checks.Checks {
-        func(customCheck Check) {
-            debug.Log("Loading check: %s\n", customCheck.Code)
-            scanner.RegisterCheckRule(rule.Rule{
-                Base: rules.Register(
-                    rules.Rule{
-                        Service:    "custom",
-                        ShortCode:  customCheck.Code,
-                        Summary:    customCheck.Description,
-                        Impact:     customCheck.Impact,
-                        Resolution: customCheck.Resolution,
-                        Provider:   provider.CustomProvider,
-                        Links:      customCheck.RelatedLinks,
-                        Severity:   customCheck.Severity,
-                    },
-                    nil,
-                ),
-                RequiredTypes:   customCheck.RequiredTypes,
-                RequiredLabels:  customCheck.RequiredLabels,
-                RequiredSources: customCheck.RequiredSources,
-                CheckTerraform: func(rootBlock *terraform.Block, module *terraform.Module) (results rules.Results) {
-                    matchSpec := customCheck.MatchSpec
-                    if !evalMatchSpec(rootBlock, matchSpec, NewCustomContext(module)) {
-                        results.Add(
-                            fmt.Sprintf("Custom check failed for resource %s. %s", rootBlock.FullName(), customCheck.ErrorMessage),
-                            rootBlock,
-                        )
-                    }
-                    return
-                },
-            })
-        }(*customCheck)
-    }
+	for _, customCheck := range checks.Checks {
+		func(customCheck Check) {
+			debug.Log("Loading check: %s\n", customCheck.Code)
+			scanner.RegisterCheckRule(rule.Rule{
+				Base: rules.Register(
+					rules.Rule{
+						Service:    "custom",
+						ShortCode:  customCheck.Code,
+						Summary:    customCheck.Description,
+						Impact:     customCheck.Impact,
+						Resolution: customCheck.Resolution,
+						Provider:   provider.CustomProvider,
+						Links:      customCheck.RelatedLinks,
+						Severity:   customCheck.Severity,
+					},
+					nil,
+				),
+				RequiredTypes:   customCheck.RequiredTypes,
+				RequiredLabels:  customCheck.RequiredLabels,
+				RequiredSources: customCheck.RequiredSources,
+				CheckTerraform: func(rootBlock *terraform.Block, module *terraform.Module) (results rules.Results) {
+					matchSpec := customCheck.MatchSpec
+					if !evalMatchSpec(rootBlock, matchSpec, NewCustomContext(module)) {
+						results.Add(
+							fmt.Sprintf("Custom check failed for resource %s. %s", rootBlock.FullName(), customCheck.ErrorMessage),
+							rootBlock,
+						)
+					} else {
+						results.AddPassed(rootBlock)
+					}
+					return
+				},
+			})
+		}(*customCheck)
+	}
 }
 
 func evalMatchSpec(b *terraform.Block, spec *MatchSpec, customCtx *customContext) bool {
