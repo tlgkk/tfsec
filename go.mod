@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.2
 	github.com/aquasecurity/defsec v0.7.3-0.20220210143534-055fbf888ce4
-	github.com/aquasecurity/trivy-config-parsers v0.0.0-20220210144846-39bbe34edd59
+	github.com/aquasecurity/trivy-config-parsers v0.0.0-20220210150016-5f1669ec78e9
 	github.com/hashicorp/go-version v1.4.0
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/liamg/tml v0.6.0
